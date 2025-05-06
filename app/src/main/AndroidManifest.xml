@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.ProyectoFinal"
+        tools:targetApi="31">
+
+        <meta-data
+            android:name="com.vuforia.engine.license.KEY"
+            android:value="AWJF3kT/////AAABmWKBvMv86klWkLFjqoJ8v0R6SMyxkqVQHHMRMiqxZAjA7uIJMvzQEotMqR0mPqEywOwrQJKcKOUi2nUlGaNGvFBSHegSOWo36xORPXA7sQCZWQq/3G9dJhajj2lQfknPvMKCJlAUVPliJ6xAXu+zDlk/7b9EmuBBtU/Is4UjaVq4LViFT1175KmHVdpTHHsYqyYGTnIo5F524yjiv7P12l1yD2EUehU7hFkoAf2OAtvtkpSGzSgqCgYYVn5W7sHyDfA3tMwAObhG3gBF33kWEHzCYaV7+3I5RuX2ZDFDqYcoJQ2Mo6Zbt3UvY8F/7SsENySBwTelYktrbM4kHDaUWjHwIkAya9XPCchnal6mqW0T" />
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.ProyectoFinal">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ARActivity"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
+            tools:ignore="LockedOrientationActivity"/>
+
+    </application>
+
+</manifest>
