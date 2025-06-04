@@ -19,3 +19,7 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Solución para conflictos de Filament
+-dontwarn com.google.android.filament.**
+-keep class com.google.ar.sceneform.** { *; }

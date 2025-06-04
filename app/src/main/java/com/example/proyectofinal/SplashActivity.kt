@@ -9,7 +9,6 @@ import android.os.Looper
 class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_splash)
 
         // Redirigir después de 2 segundos
         Handler(Looper.getMainLooper()).postDelayed({
