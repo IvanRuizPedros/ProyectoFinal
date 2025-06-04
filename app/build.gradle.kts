@@ -47,6 +47,7 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        viewBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.14"
@@ -131,4 +132,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui-tooling-preview:1.6.0")
     implementation("androidx.activity:activity-ktx:1.8.0")
+
+    // Fragment KTX (para viewModels() en un Fragment)
+    implementation("androidx.fragment:fragment-ktx:1.5.8")
 }
