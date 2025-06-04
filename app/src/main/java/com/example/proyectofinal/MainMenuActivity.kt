@@ -1,11 +1,13 @@
 package com.example.proyectofinal
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -35,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.example.proyectofinal.ui.theme.ProyectoFinalTheme
+import com.google.ar.core.ArCoreApk
 
 class MainMenuActivity : ComponentActivity() {
     private val PERMISSIONS = arrayOf(
@@ -100,7 +103,17 @@ class MainMenuActivity : ComponentActivity() {
                         // Botón para acceder a AR
                         MenuButton(
                             text = "Traductor AR",
-                            onClick = { startActivity(Intent(this@MainMenuActivity, ARActivity::class.java)) },
+                            onClick = {
+                                if (!isDeviceSupported(this@MainMenuActivity)) {
+                                    Toast.makeText(
+                                        this@MainMenuActivity,
+                                        "AR no compatible con este dispositivo",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                } else {
+                                    startActivity(Intent(this@MainMenuActivity, TextRecognitionActivity::class.java))
+                                }
+                            },
                             enabled = permissionsGranted
                         )
 
@@ -176,16 +189,23 @@ fun PermissionDeniedDialog(
     )
 }
 
+private fun isDeviceSupported(context: Context): Boolean {
+    return ArCoreApk.getInstance().checkAvailability(context).isSupported
+}
+
 @Preview(showBackground = true)
 @Composable
 fun MainMenuPreview() {
     ProyectoFinalTheme {
+        val context = LocalContext.current
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            MenuButton(text = "Traductor AR", onClick = {}, enabled = true)
+            MenuButton(text = "Traductor AR", onClick = {
+                // En preview no mostramos Toast
+            }, enabled = true)
             Spacer(modifier = Modifier.height(20.dp))
             MenuButton(text = "Verificar permisos", onClick = {}, enabled = true)
         }
