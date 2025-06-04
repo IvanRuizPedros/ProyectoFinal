@@ -12,6 +12,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url = uri("https://jitpack.io") }
+        maven { url = uri("https://google-ar-csi-prod.storage.googleapis.com/maven2") }
     }
 }
 
