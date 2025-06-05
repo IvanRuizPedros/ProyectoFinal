@@ -22,6 +22,7 @@ class OverlayView @JvmOverloads constructor(
     private val textPaint = Paint().apply {
         textSize = 48f
         color = Color.WHITE
+        setShadowLayer(4f, 2f, 2f, Color.BLACK)
     }
 
     // Para texto

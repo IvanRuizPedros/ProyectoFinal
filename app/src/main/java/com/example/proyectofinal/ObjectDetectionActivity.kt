@@ -2,6 +2,7 @@ package com.example.proyectofinal
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
 import android.widget.ArrayAdapter
@@ -16,26 +17,28 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.proyectofinal.databinding.ActivityObjectDetectionBinding
-import com.google.mlkit.nl.translate.TranslateLanguage
-import com.google.mlkit.nl.translate.Translation
-import com.google.mlkit.nl.translate.Translator
-import com.google.mlkit.nl.translate.TranslatorOptions
+import com.google.mlkit.nl.languageid.LanguageIdentification
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.objects.ObjectDetection
 import com.google.mlkit.vision.objects.defaults.ObjectDetectorOptions
 import com.google.mlkit.vision.objects.ObjectDetector
+import com.google.mlkit.vision.objects.DetectedObject
+import com.google.mlkit.nl.translate.TranslateLanguage
+import com.google.mlkit.nl.translate.Translation
+import com.google.mlkit.nl.translate.Translator
+import com.google.mlkit.nl.translate.TranslatorOptions
 import java.util.Locale
 
 class ObjectDetectionActivity : AppCompatActivity() {
     private lateinit var binding: ActivityObjectDetectionBinding
     private lateinit var objectDetector: ObjectDetector
+    private val languageIdentifier by lazy { LanguageIdentification.getClient() }
     private var translator: Translator? = null
 
-    // Lista de códigos de idioma soportados
     private val langs = TranslateLanguage.getAllLanguages()
-
     companion object {
         private const val REQUEST_CAMERA_PERMISSION = 1001
+        private const val MIN_CONFIDENCE = 0.6f
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,6 +46,7 @@ class ObjectDetectionActivity : AppCompatActivity() {
         binding = ActivityObjectDetectionBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Spinner de idiomas
         val displayNames = langs.map { code ->
             Locale(code).getDisplayName(Locale.getDefault()).ifEmpty { code }
         }
@@ -51,97 +55,101 @@ class ObjectDetectionActivity : AppCompatActivity() {
             binding.targetLangSelector.adapter = adapter
         }
 
-        // Detector de objetos ML Kit
-        val options = ObjectDetectorOptions.Builder()
+        initDetector()
+        if (allPermissionsGranted()) startCamera()
+        else ActivityCompat.requestPermissions(
+            this, arrayOf(Manifest.permission.CAMERA), REQUEST_CAMERA_PERMISSION
+        )
+    }
+
+    private fun initDetector() {
+        val opts = ObjectDetectorOptions.Builder()
             .setDetectorMode(ObjectDetectorOptions.STREAM_MODE)
             .enableMultipleObjects()
             .enableClassification()
             .build()
-        objectDetector = ObjectDetection.getClient(options)
-
-        if (allPermissionsGranted()) {
-            startCamera()
-        } else {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.CAMERA),
-                REQUEST_CAMERA_PERMISSION
-            )
-        }
+        objectDetector = ObjectDetection.getClient(opts)
     }
 
     @OptIn(ExperimentalGetImage::class)
     private fun startCamera() {
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-        cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
-
-            val preview = Preview.Builder().build().also {
-                it.setSurfaceProvider(binding.viewfinder.surfaceProvider)
-            }
-
-            val analysis = ImageAnalysis.Builder()
-                .setBackpressureStrategy(STRATEGY_KEEP_ONLY_LATEST)
-                .build()
-                .also { it.setAnalyzer(ContextCompat.getMainExecutor(this), ::analyzeImage) }
-
-            cameraProvider.unbindAll()
-            cameraProvider.bindToLifecycle(
-                this,
-                androidx.camera.core.CameraSelector.DEFAULT_BACK_CAMERA,
-                preview,
-                analysis
-            )
-        }, ContextCompat.getMainExecutor(this))
+        ProcessCameraProvider.getInstance(this).apply {
+            addListener({
+                val cp = get()
+                val preview = Preview.Builder().build().also {
+                    it.setSurfaceProvider(binding.viewfinder.surfaceProvider)
+                }
+                val analysis = ImageAnalysis.Builder()
+                    .setBackpressureStrategy(STRATEGY_KEEP_ONLY_LATEST)
+                    .build().also {
+                        it.setAnalyzer(ContextCompat.getMainExecutor(this@ObjectDetectionActivity)) { p ->
+                            analyzeImage(p)
+                        }
+                    }
+                cp.unbindAll()
+                cp.bindToLifecycle(
+                    this@ObjectDetectionActivity,
+                    androidx.camera.core.CameraSelector.DEFAULT_BACK_CAMERA,
+                    preview, analysis
+                )
+            }, ContextCompat.getMainExecutor(this@ObjectDetectionActivity))
+        }
     }
 
     @androidx.annotation.OptIn(ExperimentalGetImage::class)
     private fun analyzeImage(imageProxy: ImageProxy) {
-        val mediaImage = imageProxy.image
-        if (mediaImage != null) {
-            val inputImage = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-            objectDetector.process(inputImage)
+        imageProxy.image?.let { media ->
+            val img = InputImage.fromMediaImage(media, imageProxy.imageInfo.rotationDegrees)
+            objectDetector.process(img)
                 .addOnSuccessListener { results ->
-                    val main = results
-                        .filter { it.labels.isNotEmpty() }
-                        .maxByOrNull { it.boundingBox.width() * it.boundingBox.height() }
-                    main?.let { obj ->
-                        val label = obj.labels.maxByOrNull { it.confidence }!!.text
-                        translateAndDisplay(obj.boundingBox, label)
+                    val w = binding.viewfinder.width
+                    val h = binding.viewfinder.height
+                    val scanBox = Rect(w/4, h/4, w*3/4, h*3/4)
+
+                    // filtramos por intersección y confianza mínima
+                    val centered = results.filter { obj ->
+                        obj.labels.any { it.confidence >= MIN_CONFIDENCE }
+                                && Rect.intersects(obj.boundingBox, scanBox)
+                    }
+                    if (centered.isNotEmpty()) {
+                        val best = centered.maxByOrNull {
+                            it.labels.maxOf { lbl -> lbl.confidence }
+                        }!!
+                        val label = best.labels
+                            .filter { it.confidence >= MIN_CONFIDENCE }
+                            .maxByOrNull { it.confidence }!!.text
+                        translateObject(best.boundingBox, label)
+                    } else {
+                        binding.overlay.setObjects(emptyList())
                     }
                 }
-                .addOnFailureListener { e ->
-                    Log.e("ObjDetect", "Error: ${e.localizedMessage}")
-                }
-                .addOnCompleteListener {
-                    imageProxy.close()
-                }
-        } else {
-            imageProxy.close()
-        }
+                .addOnFailureListener { Log.e("OD", it.localizedMessage ?: "") }
+                .addOnCompleteListener { imageProxy.close() }
+        } ?: imageProxy.close()
     }
 
-    private fun translateAndDisplay(bbox: android.graphics.Rect, label: String) {
-        val srcLang = TranslateLanguage.ENGLISH
-
-        val tgtLang = langs[binding.targetLangSelector.selectedItemPosition]
-
-        val options = TranslatorOptions.Builder()
-            .setSourceLanguage(srcLang)
-            .setTargetLanguage(tgtLang)
-            .build()
-        translator?.close()
-        translator = Translation.getClient(options)
-        translator!!
-            .downloadModelIfNeeded()
-            .addOnSuccessListener {
-                translator!!.translate(label)
-                    .addOnSuccessListener { translated ->
-                        binding.overlay.setObjects(listOf( TranslatedObject(bbox, translated) ))
+    private fun translateObject(bbox: Rect, label: String) {
+        languageIdentifier.identifyLanguage(label)
+            .addOnSuccessListener { lang ->
+                val src = if (lang=="und") TranslateLanguage.ENGLISH else lang
+                val tgt = langs[binding.targetLangSelector.selectedItemPosition]
+                translator?.close()
+                translator = Translation.getClient(
+                    TranslatorOptions.Builder()
+                        .setSourceLanguage(src)
+                        .setTargetLanguage(tgt)
+                        .build()
+                )
+                translator!!.downloadModelIfNeeded()
+                    .addOnSuccessListener {
+                        translator!!.translate(label)
+                            .addOnSuccessListener { tr ->
+                                binding.overlay.setObjects(listOf( TranslatedObject(bbox, tr) ))
+                            }
                     }
             }
-            .addOnFailureListener { e ->
-                Log.e("Translator", "Download failed: ${e.localizedMessage}")
+            .addOnFailureListener {
+                binding.overlay.setObjects(listOf( TranslatedObject(bbox, label) ))
             }
     }
 
@@ -150,16 +158,13 @@ class ObjectDetectionActivity : AppCompatActivity() {
                 PackageManager.PERMISSION_GRANTED
 
     override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CAMERA_PERMISSION) {
-            if (allPermissionsGranted()) {
-                startCamera()
-            } else {
-                Toast.makeText(this, "Camera permission required", Toast.LENGTH_LONG).show()
-                finish()
-            }
+        if (requestCode == REQUEST_CAMERA_PERMISSION && allPermissionsGranted()) startCamera()
+        else {
+            Toast.makeText(this, "Camera permission required", Toast.LENGTH_LONG).show()
+            finish()
         }
     }
 
