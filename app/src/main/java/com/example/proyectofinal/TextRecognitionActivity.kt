@@ -76,7 +76,6 @@ class TextRecognitionActivity : AppCompatActivity() {
         )
     }
 
-    @OptIn(ExperimentalGetImage::class)
     private fun startCamera() {
         ProcessCameraProvider.getInstance(this).apply {
             addListener({

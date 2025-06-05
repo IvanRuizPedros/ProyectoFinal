@@ -64,20 +64,6 @@
             android:label="Detección de objetos"
             tools:ignore="DiscouragedApi" />
 
-        <!-- ACTIVIDAD QUIZ -->
-        <activity
-            android:name=".QuizActivity"
-            android:screenOrientation="portrait"
-            android:label="Ejercicios Interactivos"
-            tools:ignore="DiscouragedApi" />
-
-        <!-- ACTIVIDAD ESTADÍSTICAS -->
-        <activity
-            android:name=".StatsActivity"
-            android:screenOrientation="portrait"
-            android:label="Estadísticas"
-            tools:ignore="DiscouragedApi" />
-
         <!-- ACTIVIDAD RECONOCIMIENTO DE VOZ (Whisper) -->
         <activity
             android:name=".WhisperActivity"

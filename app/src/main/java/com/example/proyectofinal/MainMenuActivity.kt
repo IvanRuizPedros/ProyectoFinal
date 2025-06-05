@@ -63,13 +63,11 @@ class MainMenuActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Verificar permisos al iniciar
         checkPermissions()
 
         enableEdgeToEdge()
         setContent {
             ProyectoFinalTheme {
-                // Manejar diálogo de permisos
                 if (showPermissionDialog) {
                     PermissionDeniedDialog(
                         onDismiss = { showPermissionDialog = false },
@@ -78,7 +76,6 @@ class MainMenuActivity : ComponentActivity() {
                     )
                 }
 
-                // Salir si el usuario elige salir de la app
                 if (shouldFinishActivity) {
                     LaunchedEffect(Unit) { finish() }
                 }
@@ -100,7 +97,6 @@ class MainMenuActivity : ComponentActivity() {
 
                         Spacer(modifier = Modifier.height(40.dp))
 
-                        // Botón para acceder a Reconocimiento de texto
                         MenuButton(
                             text = "Reconocimiento de texto",
                             onClick = {
@@ -111,7 +107,6 @@ class MainMenuActivity : ComponentActivity() {
 
                         Spacer(modifier = Modifier.height(20.dp))
 
-                        // Botón para acceder a Detección de objetos
                         MenuButton(
                             text = "Detección de objetos",
                             onClick = {
@@ -132,7 +127,16 @@ class MainMenuActivity : ComponentActivity() {
 
                         Spacer(modifier = Modifier.height(20.dp))
 
-                        // Botón para volver a solicitar permisos
+                        MenuButton(
+                            text = "Text-To-Speech",
+                            onClick = {
+                                startActivity(Intent(this@MainMenuActivity, TTSActivity::class.java))
+                            },
+                            enabled = permissionsGranted
+                        )
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
                         MenuButton(
                             text = "Verificar permisos",
                             onClick = { checkPermissions() },
@@ -217,7 +221,6 @@ fun MainMenuPreview() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             MenuButton(text = "Traductor AR", onClick = {
-                // En preview no mostramos Toast
             }, enabled = true)
             Spacer(modifier = Modifier.height(20.dp))
             MenuButton(text = "Verificar permisos", onClick = {}, enabled = true)
