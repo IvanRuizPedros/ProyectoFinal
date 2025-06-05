@@ -25,7 +25,7 @@
     </style>
 
     <style name="TranslatedLangText" parent="SrcLangText">
-        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textColor">@android:color/darker_gray</item>
     </style>
 
     <style name="SrcText" parent="BaseText">

@@ -64,16 +64,10 @@ class TextRecognitionActivity : AppCompatActivity() {
 
         binding.targetLangSelector.onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    parent: AdapterView<*>,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
+                override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
                     lastDetectedText?.let { translateText(it) }
                 }
-                override fun onNothingSelected(parent: AdapterView<*>) {
-                }
+                override fun onNothingSelected(parent: AdapterView<*>) {}
             }
 
         if (allPermissionsGranted()) startCamera()
@@ -149,11 +143,6 @@ class TextRecognitionActivity : AppCompatActivity() {
                         }
                     }
 
-                    binding.overlay.setTextBlocks(
-                        mappedBlocks.map { it.first }
-                        // mappedBlocks.map { it.second.toRect() }
-                    )
-
                     if (mappedBlocks.isNotEmpty()) {
                         val newText = mappedBlocks.first().first.text
                         val now = System.currentTimeMillis()
@@ -199,7 +188,6 @@ class TextRecognitionActivity : AppCompatActivity() {
                     }
             }
             .addOnFailureListener {
-                // fallback
                 binding.srcText.text = input
                 binding.translatedText.text = input
             }

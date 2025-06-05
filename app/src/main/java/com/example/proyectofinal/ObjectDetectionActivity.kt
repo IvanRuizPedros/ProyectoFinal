@@ -102,37 +102,53 @@ class ObjectDetectionActivity : AppCompatActivity() {
             val img = InputImage.fromMediaImage(media, imageProxy.imageInfo.rotationDegrees)
             objectDetector.process(img)
                 .addOnSuccessListener { results ->
-                    val w = binding.viewfinder.width
-                    val h = binding.viewfinder.height
-                    val scanBox = Rect(w/4, h/4, w*3/4, h*3/4)
+                    val loc = IntArray(2)
+                    binding.objectGuideBox.getLocationOnScreen(loc)
+                    val scanBox = Rect(
+                        loc[0],
+                        loc[1],
+                        loc[0] + binding.objectGuideBox.width,
+                        loc[1] + binding.objectGuideBox.height
+                    )
 
-                    // filtramos por intersección y confianza mínima
-                    val centered = results.filter { obj ->
-                        obj.labels.any { it.confidence >= MIN_CONFIDENCE }
-                                && Rect.intersects(obj.boundingBox, scanBox)
+                    val filtered = results.filter { obj ->
+                        obj.labels.any { it.confidence >= MIN_CONFIDENCE } &&
+                                scanBox.contains(
+                                    obj.boundingBox.centerX(),
+                                    obj.boundingBox.centerY()
+                                )
                     }
-                    if (centered.isNotEmpty()) {
-                        val best = centered.maxByOrNull {
+
+                    if (filtered.isNotEmpty()) {
+                        val best = filtered.maxByOrNull {
                             it.labels.maxOf { lbl -> lbl.confidence }
                         }!!
+
                         val label = best.labels
                             .filter { it.confidence >= MIN_CONFIDENCE }
-                            .maxByOrNull { it.confidence }!!.text
-                        translateObject(best.boundingBox, label)
+                            .maxByOrNull { it.confidence }!!
+                            .text
+
+                        translateAndDisplay(best.boundingBox, label)
                     } else {
                         binding.overlay.setObjects(emptyList())
                     }
                 }
-                .addOnFailureListener { Log.e("OD", it.localizedMessage ?: "") }
-                .addOnCompleteListener { imageProxy.close() }
+                .addOnFailureListener { e ->
+                    Log.e("OD", e.localizedMessage ?: "error procesando imagen")
+                }
+                .addOnCompleteListener {
+                    imageProxy.close()
+                }
         } ?: imageProxy.close()
     }
 
-    private fun translateObject(bbox: Rect, label: String) {
+    private fun translateAndDisplay(bbox: Rect, label: String) {
         languageIdentifier.identifyLanguage(label)
             .addOnSuccessListener { lang ->
-                val src = if (lang=="und") TranslateLanguage.ENGLISH else lang
+                val src = if (lang == "und") TranslateLanguage.ENGLISH else lang
                 val tgt = langs[binding.targetLangSelector.selectedItemPosition]
+
                 translator?.close()
                 translator = Translation.getClient(
                     TranslatorOptions.Builder()
@@ -140,18 +156,26 @@ class ObjectDetectionActivity : AppCompatActivity() {
                         .setTargetLanguage(tgt)
                         .build()
                 )
+
                 translator!!.downloadModelIfNeeded()
                     .addOnSuccessListener {
                         translator!!.translate(label)
-                            .addOnSuccessListener { tr ->
-                                binding.overlay.setObjects(listOf( TranslatedObject(bbox, tr) ))
+                            .addOnSuccessListener { translated ->
+                                binding.overlay.setObjects(listOf( TranslatedObject(bbox, translated) ))
                             }
+                            .addOnFailureListener {
+                                binding.overlay.setObjects(listOf( TranslatedObject(bbox, label) ))
+                            }
+                    }
+                    .addOnFailureListener {
+                        binding.overlay.setObjects(listOf( TranslatedObject(bbox, label) ))
                     }
             }
             .addOnFailureListener {
                 binding.overlay.setObjects(listOf( TranslatedObject(bbox, label) ))
             }
     }
+
 
     private fun allPermissionsGranted() =
         ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
