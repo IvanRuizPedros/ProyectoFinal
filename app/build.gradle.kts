@@ -19,7 +19,7 @@ android {
         buildConfigField(
             type = "String",
             name = "OPENAI_API_KEY",
-            value = "\"${project.properties["OPENAI_API_KEY"]}\""
+            value = "\"${property("OPENAI_API_KEY")}\""
         )
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -91,9 +91,6 @@ dependencies {
     implementation("com.google.ar.sceneform:core:1.17.1")
     implementation("com.google.ar.sceneform.ux:sceneform-ux:1.17.1")
 
-    // ARCore
-    implementation("com.google.ar:core:1.41.0")
-
     // Kotlin Coroutines (para operaciones asíncronas)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
@@ -135,4 +132,10 @@ dependencies {
 
     // Fragment KTX (para viewModels() en un Fragment)
     implementation("androidx.fragment:fragment-ktx:1.8.8")
+
+    // OkHttp
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // JSONObject
+    implementation("org.json:json:20231013")
 }

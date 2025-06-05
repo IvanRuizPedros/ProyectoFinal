@@ -122,6 +122,16 @@ class MainMenuActivity : ComponentActivity() {
 
                         Spacer(modifier = Modifier.height(20.dp))
 
+                        MenuButton(
+                            text = "Reconocimiento de Voz",
+                            onClick = {
+                                startActivity(Intent(this@MainMenuActivity, WhisperActivity::class.java))
+                            },
+                            enabled = permissionsGranted
+                        )
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
                         // Botón para volver a solicitar permisos
                         MenuButton(
                             text = "Verificar permisos",
