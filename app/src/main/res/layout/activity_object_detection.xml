@@ -26,9 +26,9 @@
         app:layout_constraintEnd_toEndOf="@id/viewfinder" />
 
     <View
-        android:id="@+id/textGuideBox"
+        android:id="@+id/objectGuideBox"
         android:layout_width="300dp"
-        android:layout_height="65dp"
+        android:layout_height="300dp"
         android:background="@drawable/guide_box"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -38,11 +38,11 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Center text in this box"
+        android:text="Center object in this box"
         android:textColor="#AAFFFFFF"
-        app:layout_constraintTop_toTopOf="@id/textGuideBox"
-        app:layout_constraintStart_toStartOf="@id/textGuideBox"
-        app:layout_constraintEnd_toEndOf="@id/textGuideBox"
+        app:layout_constraintTop_toTopOf="@id/objectGuideBox"
+        app:layout_constraintStart_toStartOf="@id/objectGuideBox"
+        app:layout_constraintEnd_toEndOf="@id/objectGuideBox"
         android:layout_marginTop="4dp"/>
 
     <androidx.constraintlayout.widget.Guideline
@@ -50,7 +50,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_end="365dp" />
+        app:layout_constraintGuide_end="182.5dp" />
 
     <FrameLayout
         android:id="@+id/recognitionContainer"
@@ -59,62 +59,13 @@
         app:layout_constraintTop_toBottomOf="@id/middle"
         app:layout_constraintBottom_toBottomOf="parent" />
 
-    <TextView
-        android:id="@+id/srcLang"
-        style="@style/SrcLangText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="4dp"
-        app:layout_constraintBottom_toTopOf="@+id/srcTextScrollView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/middle"
-        tools:text="source lang" />
-
-    <ScrollView
-        android:id="@+id/srcTextScrollView"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_marginBottom="4dp"
-        android:fillViewport="true"
-        android:scrollbars="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/divider"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/srcLang">
-
-        <TextView
-            android:id="@+id/srcText"
-            style="@style/SrcText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            tools:text="source text" />
-    </ScrollView>
-
-    <View
-        android:id="@+id/divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:background="?android:attr/listDivider"
-        app:layout_constraintBottom_toTopOf="@+id/targetLangSelector"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/srcTextScrollView" />
-
     <Spinner
         android:id="@+id/targetLangSelector"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/divider" />
+        app:layout_constraintTop_toBottomOf="@id/middle" />
 
     <ScrollView
         android:id="@+id/translatedTextScrollView"
@@ -125,7 +76,7 @@
         android:scrollbars="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/targetLangSelector">
+        app:layout_constraintTop_toBottomOf="@+id/progressText">
 
         <TextView
             android:id="@+id/translatedText"
@@ -160,3 +111,4 @@
         app:layout_constraintTop_toTopOf="@id/progressBar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+

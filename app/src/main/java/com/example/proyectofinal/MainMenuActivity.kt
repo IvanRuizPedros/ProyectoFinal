@@ -100,19 +100,22 @@ class MainMenuActivity : ComponentActivity() {
 
                         Spacer(modifier = Modifier.height(40.dp))
 
-                        // Botón para acceder a AR
+                        // Botón para acceder a Reconocimiento de texto
                         MenuButton(
-                            text = "Traductor AR",
+                            text = "Reconocimiento de texto",
                             onClick = {
-                                if (!isDeviceSupported(this@MainMenuActivity)) {
-                                    Toast.makeText(
-                                        this@MainMenuActivity,
-                                        "AR no compatible con este dispositivo",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                } else {
-                                    startActivity(Intent(this@MainMenuActivity, TextRecognitionActivity::class.java))
-                                }
+                                startActivity(Intent(this@MainMenuActivity, TextRecognitionActivity::class.java))
+                            },
+                            enabled = permissionsGranted
+                        )
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        // Botón para acceder a Detección de objetos
+                        MenuButton(
+                            text = "Detección de objetos",
+                            onClick = {
+                                startActivity(Intent(this@MainMenuActivity, ObjectDetectionActivity::class.java))
                             },
                             enabled = permissionsGranted
                         )

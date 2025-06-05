@@ -134,5 +134,5 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.8.0")
 
     // Fragment KTX (para viewModels() en un Fragment)
-    implementation("androidx.fragment:fragment-ktx:1.5.8")
+    implementation("androidx.fragment:fragment-ktx:1.8.8")
 }
