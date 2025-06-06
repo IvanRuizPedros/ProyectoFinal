@@ -56,7 +56,6 @@ android {
         resources.excludes.add("/META-INF/{AL2.0,LGPL2.1}")
     }
     configurations.all {
-        // Forzar versión específica de Filament
         resolutionStrategy {
             force("com.google.android.filament:filament-android:1.9.23")
             force("com.google.android.filament:gltfio-android:1.9.23")
@@ -96,7 +95,6 @@ dependencies {
     // Kotlin Coroutines (para operaciones asíncronas)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
-
 
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")

@@ -187,7 +187,8 @@ class MainMenuActivity : ComponentActivity() {
                     if (nextId != null) break
                 }
                 if (nextId == null) {
-                    nextId = "${types.shuffled().first()}1"
+                    val levels = listOf("1","2","3")
+                    nextId = "${types.shuffled().first()}${levels.shuffled().first()}"
                 }
 
                 Log.d("MainMenu", "▶ Siguiente ejercicio: $nextId")

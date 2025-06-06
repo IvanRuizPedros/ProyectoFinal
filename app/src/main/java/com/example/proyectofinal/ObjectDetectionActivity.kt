@@ -46,7 +46,6 @@ class ObjectDetectionActivity : AppCompatActivity() {
         binding = ActivityObjectDetectionBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Spinner de idiomas
         val displayNames = langs.map { code ->
             Locale(code).getDisplayName(Locale.getDefault()).ifEmpty { code }
         }
@@ -71,7 +70,6 @@ class ObjectDetectionActivity : AppCompatActivity() {
         objectDetector = ObjectDetection.getClient(opts)
     }
 
-    @OptIn(ExperimentalGetImage::class)
     private fun startCamera() {
         ProcessCameraProvider.getInstance(this).apply {
             addListener({
@@ -129,7 +127,7 @@ class ObjectDetectionActivity : AppCompatActivity() {
                             .maxByOrNull { it.confidence }!!
                             .text
 
-                        translateAndDisplay(best.boundingBox, label)
+                        translateText(best.boundingBox, label)
                     } else {
                         binding.overlay.setObjects(emptyList())
                     }
@@ -143,7 +141,7 @@ class ObjectDetectionActivity : AppCompatActivity() {
         } ?: imageProxy.close()
     }
 
-    private fun translateAndDisplay(bbox: Rect, label: String) {
+    private fun translateText(bbox: Rect, label: String) {
         languageIdentifier.identifyLanguage(label)
             .addOnSuccessListener { lang ->
                 val src = if (lang == "und") TranslateLanguage.ENGLISH else lang
